@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visitors by Country</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 8px;
+    }
+    li {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      font-size: 1.1rem;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Visitors by Country</h1>
+  <ul id="visitor-list">
+    <li>Loading data...</li>
+  </ul>
+  <div class="error" id="error-msg" style="display:none;"></div>
+
+  <script>
+    async function fetchVisitors() {
+      const ul = document.getElementById('visitor-list');
+      const errorMsg = document.getElementById('error-msg');
+      try {
+        const res = await fetch('https://visitor-api-qnnx.onrender.com/api/analytics');
+        const data = await res.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Unknown error');
+        }
+
+        ul.innerHTML = ''; // Clear loading text
+        data.data.forEach(({ country, users }) => {
+          const li = document.createElement('li');
+          li.textContent = `${country}: ${users}`;
+          ul.appendChild(li);
+        });
+      } catch (err) {
+        ul.innerHTML = '';
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Failed to load visitor data.';
+        console.error('Fetch error:', err);
+      }
+    }
+
+    fetchVisitors();
+  </script>
+</body>
+</html>

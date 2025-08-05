@@ -1,8 +1,11 @@
 import express from 'express';
+import cors from 'cors';
 import { getGAData } from './ga4.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors());  // Enable CORS for all origins
 
 app.get('/api/analytics', async (req, res) => {
   try {
