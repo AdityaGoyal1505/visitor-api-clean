@@ -1,6 +1,5 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import process from 'process';
-const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
 export const getGAData = async () => {
   const credentials = {
