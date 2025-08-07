@@ -17,18 +17,36 @@ async function getTotalUsers() {
           endDate: 'today',
         },
       ],
+      dimensions: [
+        {
+          name: 'country',
+        },
+      ],
       metrics: [
         {
           name: 'totalUsers',
         },
       ],
+      orderBys: [
+        {
+          metric: {
+            metricName: 'totalUsers',
+          },
+          desc: true,
+        },
+      ],
+      limit: 10, // Top 10 countries
     });
 
-    const totalUsers = response.rows?.[0]?.metricValues?.[0]?.value || '0';
-    return { totalUsers };
+    const data = response.rows?.map(row => ({
+      country: row.dimensionValues?.[0]?.value || 'Unknown',
+      visitors: row.metricValues?.[0]?.value || '0',
+    })) || [];
+
+    return { visitorsByCountry: data };
   } catch (error) {
     console.error('Google Analytics API Error:', error);
-    return { totalUsers: '0' };
+    return { visitorsByCountry: [] };
   }
 }
 
