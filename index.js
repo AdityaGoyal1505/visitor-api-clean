@@ -1,18 +1,15 @@
-// index.js
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { getTotalUsers } = require('./ga4');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 
-const PORT = process.env.PORT || 3000;
-const PROPERTY_ID = process.env.GA4_PROPERTY_ID;
-
-app.get('/total-users', async (req, res) => {
-  const users = await getTotalUsers(PROPERTY_ID);
-  res.json({ totalUsers: users });
+app.get('/api/visitors', async (req, res) => {
+  const result = await getTotalUsers();
+  res.json(result);
 });
 
 app.listen(PORT, () => {
