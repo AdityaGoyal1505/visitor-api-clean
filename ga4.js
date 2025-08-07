@@ -1,31 +1,43 @@
-import { BetaAnalyticsDataClient } from '@google-analytics/data';
-import { google } from 'googleapis';
-
-const propertyId = process.env.GA4_PROPERTY_ID;
-
-// Read credentials from environment (Render-compatible)
-const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
 const analyticsDataClient = new BetaAnalyticsDataClient({
   credentials: {
-    client_email: clientEmail,
-    private_key: privateKey,
+    client_email: process.env.CLIENT_EMAIL,
+    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
   },
 });
 
-export async function getGAData() {
+async function getReport() {
   try {
+    const propertyId = process.env.GA4_PROPERTY_ID;
+
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
-      dimensions: [{ name: 'pagePath' }],
-      metrics: [{ name: 'screenPageViews' }],
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dateRanges: [
+        {
+          startDate: '7daysAgo',
+          endDate: 'today',
+        },
+      ],
+      dimensions: [
+        {
+          name: 'city',
+        },
+      ],
+      metrics: [
+        {
+          name: 'activeUsers',
+        },
+      ],
     });
 
-    return response.rows || [];
+    return response;
   } catch (error) {
-    console.error('Error fetching GA4 data:', error);
+    console.error('❌ Error fetching GA4 report:', error);
     throw error;
   }
 }
+
+module.exports = {
+  getReport,
+};
