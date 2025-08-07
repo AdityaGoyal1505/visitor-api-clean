@@ -1,43 +1,31 @@
+// ga4.js
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
 const analyticsDataClient = new BetaAnalyticsDataClient({
   credentials: {
-    client_email: process.env.CLIENT_EMAIL,
-    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.reple(/\\n/g, '\n'),
   },
 });
 
-async function getReport() {
+async function getTotalUsers(propertyId) {
   try {
-    const propertyId = process.env.GA4_PROPERTY_ID;
-
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: '7daysAgo',
+          startDate: '2023-01-01',
           endDate: 'today',
         },
       ],
-      dimensions: [
-        {
-          name: 'city',
-        },
-      ],
-      metrics: [
-        {
-          name: 'activeUsers',
-        },
-      ],
+      metrics: [{ name: 'totalUsers' }],
     });
 
-    return response;
+    return response.rows?.[0]?.metricValues?.[0]?.value || '0';
   } catch (error) {
-    console.error('❌ Error fetching GA4 report:', error);
-    throw error;
+    console.error('Analytics API Error:', error);
+    return '0';
   }
 }
 
-module.exports = {
-  getReport,
-};
+module.exports = { getTotalUsers };
