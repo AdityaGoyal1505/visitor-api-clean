@@ -1,29 +1,31 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
-import process from 'process';
+import { google } from 'googleapis';
 
-export const getGAData = async () => {
-  const credentials = {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  };
+const propertyId = process.env.GA4_PROPERTY_ID;
 
-  const propertyId = process.env.GA4_PROPERTY_ID;
+// Read credentials from environment (Render-compatible)
+const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-  const analyticsDataClient = new BetaAnalyticsDataClient({
-    credentials,
-  });
+const analyticsDataClient = new BetaAnalyticsDataClient({
+  credentials: {
+    client_email: clientEmail,
+    private_key: privateKey,
+  },
+});
 
-  const [response] = await analyticsDataClient.runReport({
-    property: `properties/${propertyId}`,
-    dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
-    dimensions: [{ name: 'country' }],
-    metrics: [{ name: 'activeUsers' }],
-  });
+export async function getGAData() {
+  try {
+    const [response] = await analyticsDataClient.runReport({
+      property: `properties/${propertyId}`,
+      dimensions: [{ name: 'pagePath' }],
+      metrics: [{ name: 'screenPageViews' }],
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+    });
 
-console.log(response.rows);
-
-  return response.rows.map(row => ({
-    country: row.dimensionValues[0].value,
-    users: row.metricValues[0].value,
-  }));
-};
+    return response.rows || [];
+  } catch (error) {
+    console.error('Error fetching GA4 data:', error);
+    throw error;
+  }
+}
