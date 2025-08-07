@@ -1,21 +1,20 @@
+// index.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { getReport } = require('./ga4');
+const { getTotalUsers } = require('./ga4');
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(cors());
 
-app.get('/api/analytics', async (req, res) => {
-  try {
-    const report = await getReport();
-    res.json(report);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GA4 report' });
-  }
+const PORT = process.env.PORT || 3000;
+const PROPERTY_ID = process.env.GA4_PROPERTY_ID;
+
+app.get('/total-users', async (req, res) => {
+  const users = await getTotalUsers(PROPERTY_ID);
+  res.json({ totalUsers: users });
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
