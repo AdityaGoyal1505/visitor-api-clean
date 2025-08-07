@@ -5,7 +5,9 @@ const { getTotalUsers } = require('./ga4');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Or set to your frontend URL
+}));
 
 app.get('/api/visitors', async (req, res) => {
   const result = await getTotalUsers();
