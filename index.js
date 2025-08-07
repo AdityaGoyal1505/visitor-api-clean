@@ -5,14 +5,15 @@ import { getGAData } from './ga4.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());  // Enable CORS for all origins
+// Enable CORS for all origins
+app.use(cors());
 
 app.get('/api/analytics', async (req, res) => {
   try {
     const data = await getGAData();
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    console.error('Error in /api/analytics:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch GA4 data' });
   }
 });
