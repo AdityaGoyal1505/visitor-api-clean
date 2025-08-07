@@ -1,26 +1,35 @@
-import { BetaAnalyticsDataClient } from '@google-analytics/data';
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
-const analyticsDataClient = new BetaAnalyticsDataClient();
+const propertyId = process.env.GA4_PROPERTY_ID;
 
-export async function getTotalUsers() {
-  const propertyId = process.env.GA4_PROPERTY_ID;
+const analyticsDataClient = new BetaAnalyticsDataClient({
+  credentials: {
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'), // this is important on Render
+  },
+});
 
-  const request = {
-    property: `properties/${propertyId}`,
-    dateRanges: [{ startDate: '2024-08-01', endDate: 'today' }],
-    metrics: [{ name: 'totalUsers' }],
-  };
-
-  console.log('Sending request to GA4 API:', JSON.stringify(request, null, 2));
-
+async function getActiveUsers() {
   try {
-    const [response] = await analyticsDataClient.runReport(request);
-    console.log('Received response from GA4 API:', JSON.stringify(response, null, 2));
+    const [response] = await analyticsDataClient.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [
+        {
+          startDate: '7daysAgo',
+          endDate: 'today',
+        },
+      ],
+      metrics: [{ name: 'totalUsers' }],
+    });
 
-    const totalUsers = response.rows?.[0]?.metricValues?.[0]?.value || "0";
+    const totalUsers =
+      response?.rows?.[0]?.metricValues?.[0]?.value ?? '0';
+
     return { totalUsers };
-  } catch (error) {
-    console.error('❌ Error fetching data from GA4 API:', error);
-    throw error;
+  } catch (err) {
+    console.error('Error fetching analytics:', err.message, err);
+    return { totalUsers: '0', error: err.message };
   }
 }
+
+module.exports = { getActiveUsers };
